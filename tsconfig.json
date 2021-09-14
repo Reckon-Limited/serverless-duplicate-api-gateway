@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "target": "es6",
+    "strict": true,
+    "noImplicitAny": false,
+    "sourceMap": true,
+    "outDir": "dist",
+    "types": ["jest", "node"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["test/**/*.ts"]
+}

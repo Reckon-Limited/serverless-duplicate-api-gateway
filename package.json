@@ -1,0 +1,62 @@
+{
+  "name": "@reckon-limited/serverless-duplicate-api-gateway",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=14"
+  },
+  "license": "MIT",
+  "description": "Serverless Plugin that creates a duplicate ApiGateway",
+  "author": "Reckon",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Reckon-Limited/serverless-duplicate-api-gateway.git"
+  },
+  "keywords": [
+    "serverless plugin duplicate api",
+    "serverless plugin duplicate apigateway",
+    "duplicate api",
+    "serverless plugins",
+    "api gateway",
+    "apigateway",
+    "aws",
+    "amazon",
+    "amazon web services",
+    "serverless.com"
+  ],
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "cd test/component && npx serverless package && jest",
+    "lint": "eslint . --ext .ts",
+    "build": "tsc",
+    "release": "npm run build && changeset publish"
+  },
+  "dependencies": {
+    "@changesets/cli": "^2.17.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@types/node": "^16.9.1",
+    "@typescript-eslint/eslint-plugin": "^4.31.0",
+    "@typescript-eslint/parser": "^4.31.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "jest": "^27.1.1",
+    "prettier": "^2.4.0",
+    "serverless": "^2.57.0",
+    "serverless-plugin-stage-variables": "^1.9.5",
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.4.2"
+  },
+  "peerDependencies": {
+    "serverless": "2.x"
+  },
+  "bugs": {
+    "url": "https://github.com/Reckon-Limited/serverless-duplicate-api-gateway/issues"
+  },
+  "homepage": "https://github.com/Reckon-Limited/serverless-duplicate-api-gateway#readme",
+  "publishConfig": {
+    "access": "public"
+  }
+}
