@@ -1,5 +1,11 @@
 # @reckon-limited/serverless-duplicate-api-gateway
 
+## 1.0.2
+
+### Patch Changes
+
+- f7b3caa: Updated Readme
+
 ## 1.0.1
 
 ### Patch Changes
