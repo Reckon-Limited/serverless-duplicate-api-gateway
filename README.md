@@ -28,16 +28,16 @@ custom:
   duplicate-api:
     duplicateApiNameSuffix: 'duplicate'
     removeAuthorization: true
-    removeApiKeys: true
-    removeUsagePlans: true
+    removeApiKeysAndUsagePlans: true
+    disableDefaultEndpoint: true
 ```
 
-| Parameter Name         | Default Value | Description                                                                                                                                                                                                                                   |
-| ---------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| duplicateApiNameSuffix | `duplicate`   | The string that is appended to the name of the duplicate ApiGateway. A `-` is used as a separator between the original name and the string. e.g Original: `test-api`, duplicateApiNameSuffix: `duplicate`, New API name: `test-api-duplicate` |
-| removeAuthorization    | `false`       | If set to true will remove all Authorizers from the duplicate ApiGateway and change all methods to use `Authorization:'NONE'`                                                                                                                 |
-| removeApiKeys          | `false`       | If set to true will remove all Api Keys from the duplicate ApiGateway and change all methods to use `ApiKeyRequired: false`                                                                                                                   |
-| removeUsagePlans       | `false`       | If set to true will remove all Usage Plans and Usage Plan Keys from the duplicate ApiGateway.                                                                                                                                                 |
+| Parameter Name             | Default Value | Description                                                                                                                                                                                                                                   |
+| -------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| duplicateApiNameSuffix     | `duplicate`   | The string that is appended to the name of the duplicate ApiGateway. A `-` is used as a separator between the original name and the string. e.g Original: `test-api`, duplicateApiNameSuffix: `duplicate`, New API name: `test-api-duplicate` |
+| removeAuthorization        | `false`       | If set to true will remove Authorizers from the duplicate ApiGateway and change all methods to use `Authorization:'NONE'`                                                                                                                     |
+| removeApiKeysAndUsagePlans | `false`       | If set to true will remove Api Keys, Usage Plans and Usage Plan Keys from the duplicate ApiGateway and change all methods to use `ApiKeyRequired: false`                                                                                      |
+| disableDefaultEndpoint     | `false`       | If set to true will remove disable the default endpoint of the duplicate ApiGateway.                                                                                                                                                          |
 
 ## Referencing Duplicate Resources
 
@@ -58,7 +58,7 @@ ApiGatewayBasePathMapping:
 If you wanted to create a similar Base Path Mapping for the duplicate ApiGateway:
 
 ```
-ApiGatewayBasePathMapping:
+SecondApiGatewayBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
       DomainName: 'domain-name'
