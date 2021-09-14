@@ -16,7 +16,7 @@ Add the plugin to serverless.yml:
 
 ```yaml
 plugins:
-  - serverless-duplicate-api-gateway
+  - '@reckon-limited/serverless-duplicate-api-gateway'
 ```
 
 ## Usage
