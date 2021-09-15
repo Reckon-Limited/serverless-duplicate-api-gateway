@@ -28,7 +28,9 @@ jobs:
         run: npm run lint
 
       - name: Test
-        run: npm run test
+        run: |
+          npm run test
+          npm run test:integration
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets

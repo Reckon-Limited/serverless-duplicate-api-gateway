@@ -25,10 +25,11 @@
   ],
   "main": "dist/index.js",
   "scripts": {
-    "test": "cd test/component && npx serverless package && jest",
+    "test": "cd test/component && npx serverless package && jest test/component/*",
     "lint": "eslint . --ext .ts",
     "build": "tsc",
     "release": "npm run build && changeset publish",
+    "test:integration": "jest test/integration/*",
     "prepare": "husky install"
   },
   "dependencies": {

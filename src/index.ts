@@ -134,23 +134,30 @@ export class ServerlessDuplicateApiGatewayPlugin {
     }, {});
   }
 
-  replaceStringsInObject(obj, findStr, suffix): Resources {
-    return _.mapValues(obj, (value) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  replaceStringsInObject(obj: Record<string, any>, findStr: string, suffix: string, cache = new Map()): Resources {
+    if (cache && cache.has(obj)) return cache.get(obj);
+    const result = _.isArray(obj) ? [] : {};
+    cache && cache.set(obj, result);
+    for (const [key, value] of Object.entries(obj)) {
+      let v;
       if (_.isString(value)) {
-        return value.replace(RegExp(`^${findStr}$`), findStr + suffix);
+        v = value.replace(RegExp(`^${findStr}$`), findStr + suffix);
       } else if (_.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
           value[i] = _.isString(value[i])
             ? value[i].replace(RegExp(`^${findStr}$`), findStr + suffix)
             : this.replaceStringsInObject(value[i], findStr, suffix);
         }
-        return value;
+        v = value;
       } else if (_.isObject(value)) {
-        return this.replaceStringsInObject(value, findStr, suffix);
+        v = this.replaceStringsInObject(value, findStr, suffix);
       } else {
-        return value;
+        v = value;
       }
-    });
+      result[key] = v;
+    }
+    return result;
   }
 }
 

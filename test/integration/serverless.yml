@@ -1,0 +1,64 @@
+service: test
+
+plugins:
+  - serverless-plugin-stage-variables
+  - duplicate-api-plugin
+
+custom:
+  duplicate-api:
+    duplicateApiNameSuffix: 'duplicate'
+    removeAuthorization: true
+    removeApiKeys: true
+    removeUsagePlans: true
+  stageVariables:
+    test_var: test
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: 'ap-southeast-2'
+  stage: dev
+  apiGateway:
+    apiKeys: # List of API keys to be used by your service API Gateway REST API
+      - testKey
+    usagePlan: # Optional usage plan configuration
+      quota:
+        limit: 5000
+        offset: 2
+        period: MONTH
+      throttle:
+        burstLimit: 200
+        rateLimit: 100
+  versionFunctions: false
+
+functions:
+  testGet:
+    handler: 'handler.hello'
+    events:
+      - http:
+          path: /test/get/{testParam}
+          method: get
+          authorizer:
+            arn: arn:aws:lambda:ap-southeast-2:123456789:function:testAuthorizer
+            resultTtlInSeconds: 0
+            identitySource: method.request.header.testHeader
+            type: request
+            managedExternally: true
+          request:
+            parameters:
+              paths:
+                testParam: true
+  testPost:
+    handler: 'handler.hello'
+    events:
+      - http:
+          path: /test/post
+          method: post
+          authorizer: AWS_IAM
+  testApiKey:
+    handler: 'handler.hello'
+    events:
+      - http:
+          path: /test/delete
+          method: delete
+          private: true
