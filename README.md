@@ -9,14 +9,14 @@ Our use case for this plugin was to create identical Gateways to our APIs which 
 ## Installation
 
 ```
-npm install --save-dev serverless-duplicate-api-gateway
+npm install --save-dev @reckon-limited/serverless-duplicate-api-gateway
 ```
 
 Add the plugin to serverless.yml:
 
 ```yaml
 plugins:
-  - serverless-duplicate-api-gateway
+  - '@reckon-limited/serverless-duplicate-api-gateway'
 ```
 
 ## Usage
