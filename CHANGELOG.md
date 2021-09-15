@@ -1,5 +1,15 @@
 # @reckon-limited/serverless-duplicate-api-gateway
 
+## 1.1.0
+
+### Minor Changes
+
+- 7ef717f: Changed resource name appending code
+
+### Patch Changes
+
+- 1decda6: Updated Readme
+
 ## 1.0.1
 
 ### Patch Changes
