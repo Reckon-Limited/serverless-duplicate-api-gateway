@@ -337,11 +337,10 @@ describe('Given Authorization and ApiKeys are not removed', () => {
         expect(resource.Properties.DeploymentId.Ref.endsWith(DUPLICATE_SUFFIX)).toBeTruthy();
       }
     });
-    test('Then all duplicate ApiGateway::RequestValidator RestApiIds and Ids should refer to the duplicate', () => {
+    test('Then all duplicate ApiGateway::RequestValidator RestApiIds should refer to the duplicate', () => {
       const duplicateResources = getDuplicateResourcesByType('ApiGateway::RequestValidator');
       for (const resource of Object.values(duplicateResources)) {
         expect(resource.Properties.RestApiId.Ref.endsWith(DUPLICATE_SUFFIX)).toBeTruthy();
-        expect(resource.Properties.Name.endsWith(DUPLICATE_SUFFIX)).toBeTruthy();
       }
     });
     test('Then all duplicate ApiGateway::LambdaPermission RestApiIds and Ids should refer to the duplicate', () => {

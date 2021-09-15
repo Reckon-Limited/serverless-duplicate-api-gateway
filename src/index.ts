@@ -1,5 +1,5 @@
 import { ServerlessInstance, DuplicateApiConfig, Resources } from './types';
-import { cloneDeep } from 'lodash';
+import * as _ from 'lodash';
 
 const DUPLICATE_SUFFIX = 'Duplicate';
 
@@ -31,57 +31,43 @@ export class ServerlessDuplicateApiGatewayPlugin {
     let resources = this.serverless.service.provider.compiledCloudFormationTemplate.Resources;
 
     const apiGatewayResources = Object.fromEntries(Object.entries(resources).filter(([, value]) => value.Type.startsWith('AWS::ApiGateway')));
-    const duplicateApiGatewayResources = cloneDeep(apiGatewayResources);
+    const duplicateApiGatewayResources = _.cloneDeep(apiGatewayResources);
 
     this.handleRestApi(duplicateApiGatewayResources, this.config);
-    this.handleResources(duplicateApiGatewayResources);
     this.handleMethods(duplicateApiGatewayResources, this.config);
     this.handleAuthorizers(duplicateApiGatewayResources, this.config);
-    this.handleDeployment(duplicateApiGatewayResources);
     this.handleApiKeys(duplicateApiGatewayResources, this.config);
-    this.handleStages(duplicateApiGatewayResources);
-    this.handleRequestValidators(duplicateApiGatewayResources);
 
     const lambdaPermissionResources = Object.fromEntries(Object.entries(resources).filter(([, value]) => value.Type === 'AWS::Lambda::Permission'));
-    const duplicateLambdaPermissionResources = cloneDeep(lambdaPermissionResources);
-    this.handleLambdaPermission(duplicateLambdaPermissionResources);
+    const duplicateLambdaPermissionResources = _.cloneDeep(lambdaPermissionResources);
 
-    const duplicateApiGatewayResourcesNameAppended = this.getObjectWithSuffixAppendedToKeys(duplicateApiGatewayResources, DUPLICATE_SUFFIX);
-    const duplicateLambdaPermissionResourcesNameAppended = this.getObjectWithSuffixAppendedToKeys(
-      duplicateLambdaPermissionResources,
-      DUPLICATE_SUFFIX
-    );
+    const apiGatewayResourceKeys = Object.keys(apiGatewayResources);
+    const lambdaPermissionResourceKeys = Object.keys(lambdaPermissionResources);
+    let duplicateResources = {
+      ...duplicateApiGatewayResources,
+      ...duplicateLambdaPermissionResources
+    };
 
-    this.appendSuffixToDependsOnProperties(duplicateApiGatewayResourcesNameAppended, DUPLICATE_SUFFIX);
-    this.appendSuffixToDependsOnProperties(duplicateLambdaPermissionResourcesNameAppended, DUPLICATE_SUFFIX);
+    const originalKeys = [...apiGatewayResourceKeys, ...lambdaPermissionResourceKeys];
+    originalKeys.forEach((key) => {
+      duplicateResources = this.replaceStringsInObject(duplicateResources, key, DUPLICATE_SUFFIX);
+    });
+
+    const duplicateLambdaPermissionResourcesNameAppended = this.getObjectWithSuffixAppendedToKeys(duplicateResources, DUPLICATE_SUFFIX);
 
     resources = {
       ...resources,
-      ...duplicateApiGatewayResourcesNameAppended,
       ...duplicateLambdaPermissionResourcesNameAppended
     };
     this.serverless.service.provider.compiledCloudFormationTemplate.Resources = resources;
   }
 
-  handleRestApi = (duplicateApiGatewayResources: Resources, config: DuplicateApiConfig): void => {
+  handleRestApi(duplicateApiGatewayResources: Resources, config: DuplicateApiConfig): void {
     duplicateApiGatewayResources['ApiGatewayRestApi'].Properties.Name += `-${config.duplicateApiNameSuffix}`;
     duplicateApiGatewayResources['ApiGatewayRestApi'].Properties.DisableExecuteApiEndpoint = config.disableDefaultEndpoint;
-  };
+  }
 
-  handleResources = (duplicateApiGatewayResources: Resources): void => {
-    const duplicateResources = Object.values(duplicateApiGatewayResources).filter((value) => value.Type === 'AWS::ApiGateway::Resource');
-    for (const resource of duplicateResources) {
-      const getAttArray = resource.Properties.ParentId['Fn::GetAtt'];
-      if (getAttArray) {
-        getAttArray[0] += DUPLICATE_SUFFIX;
-      } else {
-        resource.Properties.ParentId.Ref += DUPLICATE_SUFFIX;
-      }
-      resource.Properties.RestApiId.Ref += DUPLICATE_SUFFIX;
-    }
-  };
-
-  handleMethods = (duplicateApiGatewayResources: Resources, config: DuplicateApiConfig): void => {
+  handleMethods(duplicateApiGatewayResources: Resources, config: DuplicateApiConfig): void {
     const duplicateMethods = Object.values(duplicateApiGatewayResources).filter((value) => value.Type === 'AWS::ApiGateway::Method');
     for (const method of duplicateMethods) {
       if (config.removeAuthorization) {
@@ -98,41 +84,23 @@ export class ServerlessDuplicateApiGatewayPlugin {
           delete method.Properties.AuthorizerId;
           delete method.Properties.AuthorizationScopes;
         }
-      } else {
-        if (method.Properties.AuthorizerId) method.Properties.AuthorizerId.Ref += DUPLICATE_SUFFIX;
       }
       if (config.removeApiKeysAndUsagePlans) {
         method.Properties.ApiKeyRequired = false;
       }
-
-      method.Properties.RestApiId.Ref += DUPLICATE_SUFFIX;
-      method.Properties.ResourceId.Ref += DUPLICATE_SUFFIX;
-      if (method.Properties.RequestValidatorId) method.Properties.RequestValidatorId.Ref += DUPLICATE_SUFFIX;
     }
-  };
+  }
 
-  handleAuthorizers = (duplicateApiGatewayResources: Resources, config: DuplicateApiConfig): void => {
+  handleAuthorizers(duplicateApiGatewayResources: Resources, config: DuplicateApiConfig): void {
     const authorizerEntries = Object.entries(duplicateApiGatewayResources).filter(([, value]) => value.Type === 'AWS::ApiGateway::Authorizer');
     if (config.removeAuthorization) {
       for (const entry of authorizerEntries) {
         delete duplicateApiGatewayResources[entry[0]];
       }
-    } else {
-      for (const entry of authorizerEntries) {
-        entry[1].Properties.RestApiId.Ref += DUPLICATE_SUFFIX;
-      }
     }
-  };
+  }
 
-  handleDeployment = (duplicateApiGatewayResources: Resources): void => {
-    const duplicateDeployment = Object.values(duplicateApiGatewayResources).find((value) => value.Type === 'AWS::ApiGateway::Deployment');
-    if (duplicateDeployment) {
-      duplicateDeployment.Properties.RestApiId.Ref += DUPLICATE_SUFFIX;
-      if (duplicateDeployment.Properties.Id) duplicateDeployment.Properties.Id += DUPLICATE_SUFFIX;
-    }
-  };
-
-  handleApiKeys = (duplicateApiGatewayResources: Resources, config: DuplicateApiConfig): void => {
+  handleApiKeys(duplicateApiGatewayResources: Resources, config: DuplicateApiConfig): void {
     const apiKeyEntries = Object.entries(duplicateApiGatewayResources).filter(([, value]) => value.Type === 'AWS::ApiGateway::ApiKey');
     const usagePlanEntries = Object.entries(duplicateApiGatewayResources).filter(([, value]) => value.Type === 'AWS::ApiGateway::UsagePlan');
     const usagePlanKeyEntries = Object.entries(duplicateApiGatewayResources).filter(([, value]) => value.Type === 'AWS::ApiGateway::UsagePlanKey');
@@ -151,48 +119,13 @@ export class ServerlessDuplicateApiGatewayPlugin {
       for (const entry of apiKeyEntries) {
         const value = entry[1];
         value.Properties.Name += DUPLICATE_SUFFIX;
-        const stageKeys = value.Properties.StageKeys;
-        for (const stageKey of stageKeys) {
-          stageKey.RestApiId.Ref += DUPLICATE_SUFFIX;
-        }
       }
       for (const entry of usagePlanEntries) {
         const value = entry[1];
         value.Properties.UsagePlanName += `-${config.duplicateApiNameSuffix}`;
-        const apiStages = value.Properties.ApiStages;
-        for (const apiStage of apiStages) {
-          apiStage.ApiId.Ref += DUPLICATE_SUFFIX;
-        }
-      }
-      for (const entry of usagePlanKeyEntries) {
-        const value = entry[1];
-        value.Properties.KeyId.Ref += DUPLICATE_SUFFIX;
-        value.Properties.UsagePlanId.Ref += DUPLICATE_SUFFIX;
       }
     }
-  };
-
-  handleStages = (duplicateApiGatewayResources: Resources): void => {
-    const duplicateStage = Object.values(duplicateApiGatewayResources).find((value) => value.Type === 'AWS::ApiGateway::Stage');
-    if (duplicateStage) {
-      duplicateStage.Properties.RestApiId.Ref += DUPLICATE_SUFFIX;
-      duplicateStage.Properties.DeploymentId.Ref += DUPLICATE_SUFFIX;
-    }
-  };
-
-  handleRequestValidators = (duplicateApiGatewayResources: Resources): void => {
-    const requestValidators = Object.values(duplicateApiGatewayResources).filter((value) => value.Type === 'AWS::ApiGateway::RequestValidator');
-    for (const validator of requestValidators) {
-      validator.Properties.Name += ` | ${DUPLICATE_SUFFIX}`;
-      validator.Properties.RestApiId.Ref += DUPLICATE_SUFFIX;
-    }
-  };
-
-  handleLambdaPermission = (duplicateLambdaPermissionResources: Resources): void => {
-    for (const lambdaPermission of Object.values(duplicateLambdaPermissionResources)) {
-      lambdaPermission.Properties.SourceArn['Fn::Join'][1][7].Ref += DUPLICATE_SUFFIX;
-    }
-  };
+  }
 
   getObjectWithSuffixAppendedToKeys(object: Resources, suffix: string): Resources {
     return Object.keys(object).reduce((acc, key) => {
@@ -201,15 +134,23 @@ export class ServerlessDuplicateApiGatewayPlugin {
     }, {});
   }
 
-  appendSuffixToDependsOnProperties(object: Resources, suffix: string): void {
-    const values = Object.values(object);
-    for (const value of values) {
-      if (Array.isArray(value.DependsOn)) {
-        value.DependsOn = value.DependsOn.map((item) => (item += suffix));
-      } else if (value.DependsOn) {
-        value.DependsOn += suffix;
+  replaceStringsInObject(obj, findStr, suffix): Resources {
+    return _.mapValues(obj, (value) => {
+      if (_.isString(value)) {
+        return value.replace(RegExp(`^${findStr}$`), findStr + suffix);
+      } else if (_.isArray(value)) {
+        for (let i = 0; i < value.length; i++) {
+          value[i] = _.isString(value[i])
+            ? value[i].replace(RegExp(`^${findStr}$`), findStr + suffix)
+            : this.replaceStringsInObject(value[i], findStr, suffix);
+        }
+        return value;
+      } else if (_.isObject(value)) {
+        return this.replaceStringsInObject(value, findStr, suffix);
+      } else {
+        return value;
       }
-    }
+    });
   }
 }
 
