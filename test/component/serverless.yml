@@ -34,7 +34,7 @@ functions:
     handler: 'handler.hello'
     events:
       - http:
-          path: /test/get
+          path: /test/get/{testParam}
           method: get
           authorizer:
             arn: arn:aws:lambda:ap-southeast-2:123456789:function:testAuthorizer
@@ -42,6 +42,10 @@ functions:
             identitySource: method.request.header.testHeader
             type: request
             managedExternally: true
+          request:
+            parameters:
+              paths:
+                testParam: true
   testPost:
     handler: 'handler.hello'
     events:
