@@ -1,5 +1,12 @@
 # @reckon-limited/serverless-duplicate-api-gateway
 
+## 1.2.0
+
+### Minor Changes
+
+- 186c610: Changed resource name appending code
+- 186c610: Added integration test and fixed template output bug
+
 ## 1.1.0
 
 ### Minor Changes
