@@ -902,7 +902,7 @@
         },
         "ValidateRequestBody": true,
         "ValidateRequestParameters": true,
-        "Name": "test-dev | Validate request body and querystring parameters | Duplicate"
+        "Name": "test-dev | Validate request body and querystring parameters"
       }
     },
     "ApiGatewayDeployment1631704053187Duplicate": {

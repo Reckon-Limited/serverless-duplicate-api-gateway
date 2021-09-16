@@ -3,3 +3,4 @@ dist
 test/*/.serverless
 test/integration/.serverless_plugins
 test/integration/package.tgz
+test/integration/package

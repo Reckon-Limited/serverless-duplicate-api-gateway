@@ -29,7 +29,7 @@
     "lint": "eslint . --ext .ts",
     "build": "tsc",
     "release": "npm run build && changeset publish",
-    "test:integration": "jest test/integration/*",
+    "test:integration": "npm run build && jest test/integration/*",
     "prepare": "husky install"
   },
   "dependencies": {

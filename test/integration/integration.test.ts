@@ -1,11 +1,18 @@
 import { execSync } from 'child_process';
-import * as _ from 'lodash';
 
 describe('Given I call serverless package with the duplicate api plugin', () => {
   beforeAll(async () => {
     const output = execSync('./testSetup.sh', {
       cwd: './test/integration'
     }).toString();
+    // eslint-disable-next-line
+    console.log(output);
+  });
+  afterAll(async () => {
+    const output = execSync('./testCleanup.sh', {
+      cwd: './test/integration'
+    }).toString();
+    // eslint-disable-next-line
     console.log(output);
   });
   test('Then the cloudformation template should match the snapshot', () => {
@@ -25,6 +32,7 @@ describe('Given I call serverless package with the duplicate api plugin', () => 
 });
 
 function removeKeys(obj, keys: string[]) {
+  // eslint-disable-next-line prefer-const
   for (let [key, value] of Object.entries(obj)) {
     if (keys.includes(key)) {
       delete obj[key];
@@ -36,9 +44,6 @@ function removeKeys(obj, keys: string[]) {
 }
 
 function removeRandomIds(template) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const state = require('./.serverless/serverless-state.json');
-  const functions = Object.keys(state.service.functions);
   let newTemplate = JSON.stringify(template);
   newTemplate = newTemplate
     .replace(RegExp('"ApiGatewayDeployment\\d+Duplicate"', 'g'), '"ApiGatewayDeploymentDuplicate"')
